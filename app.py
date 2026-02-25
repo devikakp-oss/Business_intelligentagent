@@ -19,7 +19,7 @@ if not monday_api_key:
 def get_boards():
     url = "https://api.monday.com/v2"
     headers = {
-        "Authorization": monday_api_key,
+        "Authorization": f"Bearer {monday_api_key}",
         "Content-Type": "application/json"
     }
     query = """
@@ -46,18 +46,20 @@ def get_boards():
 def get_board_items(board_id):
     url = "https://api.monday.com/v2"
     headers = {
-        "Authorization": monday_api_key,
+        "Authorization": f"Bearer {monday_api_key}",
         "Content-Type": "application/json"
     }
     query = f"""
     query {{
         boards(ids: [{board_id}]) {{
-            items {{
-                id
-                name
-                column_values {{
+            items_page {{
+                items {{
                     id
-                    text
+                    name
+                    column_values {{
+                        id
+                        text
+                    }}
                 }}
             }}
         }}
@@ -70,7 +72,7 @@ def get_board_items(board_id):
         if 'errors' in data:
             st.error(f"GraphQL Errors: {data['errors']}")
             return []
-        return data.get('data', {}).get('boards', [{}])[0].get('items', [])
+        return data.get('data', {}).get('boards', [{}])[0].get('items_page', {}).get('items', [])
     except requests.exceptions.RequestException as e:
         st.error(f"API request failed: {str(e)}")
         return []
