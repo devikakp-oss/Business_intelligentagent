@@ -42,9 +42,42 @@ def get_boards():
         st.error(f"API request failed: {str(e)}")
         return []
 
+# Function to fetch items from a specific board
+def get_board_items(board_id):
+    url = "https://api.monday.com/v2"
+    headers = {
+        "Authorization": monday_api_key,
+        "Content-Type": "application/json"
+    }
+    query = f"""
+    query {{
+        boards(ids: [{board_id}]) {{
+            items {{
+                id
+                name
+                column_values {{
+                    id
+                    text
+                }}
+            }}
+        }}
+    }}
+    """
+    try:
+        response = requests.post(url, json={'query': query}, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        if 'errors' in data:
+            st.error(f"GraphQL Errors: {data['errors']}")
+            return []
+        return data.get('data', {}).get('boards', [{}])[0].get('items', [])
+    except requests.exceptions.RequestException as e:
+        st.error(f"API request failed: {str(e)}")
+        return []
+
 # Streamlit UI
-st.title("Monday.com Business Intelligence Agent - Phase 1")
-st.subheader("Fetching Board Names")
+st.title("Monday.com Business Intelligence Agent")
+st.subheader("Phase 1: Fetching Board Names")
 
 boards = get_boards()
 
@@ -54,3 +87,17 @@ if boards:
         st.write(f"- **ID:** {board['id']}, **Name:** {board['name']}")
 else:
     st.write("No boards found. Please check your API key and connection.")
+
+st.subheader("Phase 2: Fetching Board Items")
+
+# Hardcoded board IDs based on fetched boards
+deals_board_id = "5026839585"  # Deals board
+work_orders_board_id = "5026840149"  # Work_Order_Tracker_Data board
+
+st.write("### Deals Board Items:")
+deals_items = get_board_items(deals_board_id)
+st.json(deals_items)
+
+st.write("### Work Orders Board Items:")
+work_orders_items = get_board_items(work_orders_board_id)
+st.json(work_orders_items)
