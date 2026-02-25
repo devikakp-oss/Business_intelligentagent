@@ -4,7 +4,7 @@ import os
 import requests
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.getcwd(), '.env'))
 
 # Get API keys
 monday_api_key = os.getenv('MONDAY_API_KEY')
