@@ -1,14 +1,10 @@
 import streamlit as st
-from dotenv import load_dotenv
 import os
 import requests
 import datetime
 import json
 from openai import OpenAI
 import json
-
-# Load environment variables
-load_dotenv(os.path.join(os.getcwd(), '.env'))
 
 # Get API keys
 monday_api_key = os.getenv('MONDAY_API_KEY')
